@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_car_booking_form" model="ir.ui.view">
+        <field name="name">view.car.booking.form</field>
+        <field name="model">car.booking</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar" nolabel="1"/>
+                    <button name="action_nhap" string="Nháp" type="object" class="btn-primary"
+                            invisible="state not in ['huy']"/>
+                    <button name="action_xac_nhan" string="Xác nhận" type="object" class="btn-primary"
+                            groups="car.group_customer,car.group_admin"
+                            invisible="state in ['dang_thuc_hien','hoan_thanh','xac_nhan','huy']"/>
+                    <button name="action_dang_thuc_hien" string="Đang thực hiện"
+                            groups="car.group_driver,car.group_admin" type="object" class="btn-primary"
+                            invisible="state in ['nhap','dang_thuc_hien','hoan_thanh','huy',]"/>
+                    <button name="action_hoan_thanh" string="Hoàn thành" groups="car.group_driver,car.group_admin"
+                            type="object" class="btn-primary"
+                            invisible="state in ['nhap','huy','hoan_thanh','xac_nhan']"/>
+                    <button name="action_huy" string="Hủy" type="object" class="btn-primary"
+                            groups="car.group_customer,car.group_admin"
+                            invisible="state in ['dang_thuc_hien','hoan_thanh']"/>
+
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="customer_id"   
+                                   readonly="state in ['xac_nhan', 'dang_thuc_hien','hoan_thanh']"/>
+                            <field name="vehicle_id" domain="[('availability_status','=','san_sang'),('car_company_id.is_active','=',True)]"
+                                   readonly="state in ['xac_nhan', 'dang_thuc_hien','hoan_thanh']"/>
+                            <field name="driver_id" domain="[('driver_status', '=', 'online'),('role','=','driver')]"
+                                   readonly="state in ['xac_nhan', 'dang_thuc_hien','hoan_thanh']"/>
+                        </group>
+                        <group>
+
+                            <field name="booking_date" readonly="state in ['xac_nhan', 'dang_thuc_hien','hoan_thanh']"/>
+                            <field name="pickup_date" readonly="state in ['xac_nhan', 'dang_thuc_hien','hoan_thanh']"/>
+                            <field name="return_date" readonly="state in ['xac_nhan', 'dang_thuc_hien','hoan_thanh']"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_car_booking_list" model="ir.ui.view">
+        <field name="name">view.car.booking.list</field>
+        <field name="model">car.booking</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="customer_id"/>
+                <field name="state"/>
+                <field name="driver_id"/>
+                <field name="vehicle_id"/>
+                <field name="pickup_date"/>
+                <field name="return_date"/>
+                <field name="total_price"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_car_booking_search" model="ir.ui.view">
+        <field name="name">view.car.booking.search</field>
+        <field name="model">car.booking</field>
+        <field name="arch" type="xml">
+            <search>
+                <group>
+                    <field name="customer_id" string="Khách hàng"/>
+                    <field name="driver_id" string="Tài xế"/>
+
+                    <filter name="filter_state_hoan_thanh" string="Đơn hoàn thành"
+                            domain="[('state','=','hoan_thanh')]"/>
+                    <filter name="filter_state_nhap" string="Đơn nháp" domain="[('state','=','nhap')]"/>
+                    <filter name="filter_state_dang_xu_ly" string="Đơn đang xử lý"
+                            domain="[('state','in' ,['xac_nhan','dang_thuc_hien'])]"/>
+
+                    <group expand="0" string="Group_by">
+                        <filter name="group_state" string="State" context="{'group_by':'state'}"/>
+                    </group>
+                </group>
+                <searchpanel>
+                    <field name="state" enable_counters="1" icon="fa-plus-square-o" select="multi"/>
+                </searchpanel>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_car_booking" model="ir.actions.act_window">
+        <field name="name">Thông tin đặt xe</field>
+        <field name="res_model">car.booking</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_car_booking_list"/>
+        <field name="search_view_id" ref="view_car_booking_search"/>
+    </record>
+
+    <menuitem id="menu_car_booking"
+              name="Thông tin đặt xe"
+              parent="menu_car_booking_root"
+              action="action_car_booking"
+              sequence="10"/>
+</odoo>

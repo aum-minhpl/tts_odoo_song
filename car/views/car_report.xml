@@ -1,0 +1,91 @@
+<odoo>
+    <record id="view_car_booking_report_graph_by_month" model="ir.ui.view">
+        <field name="name">car.booking.graph.month</field>
+        <field name="model">car.booking</field>
+        <field name="arch" type="xml">
+            <graph string="Thống kê đơn theo tháng" type="bar">
+                <field name="id" type="measure"/>
+                <field name="pickup_date" interval="month" type="row"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_car_booking_graph_vehicle" model="ir.ui.view">
+        <field name="name">car.booking.graph.vehicle</field>
+        <field name="model">car.booking</field>
+        <field name="arch" type="xml">
+            <graph string="Xe được đặt nhiều nhất" type="bar">
+                <field name="id" type="measure"/>
+                <field name="vehicle_id" type="row"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_car_booking_graph_customer" model="ir.ui.view">
+        <field name="name">car.booking.graph.customer</field>
+        <field name="model">car.booking</field>
+        <field name="arch" type="xml">
+            <graph string="Khách hàng đặt nhiều nhất" type="bar">
+                <field name="id" type="measure"/>
+                <field name="customer_id" type="row"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_car_booking_graph" model="ir.actions.act_window">
+        <field name="name">Thống kê đặt xe</field>
+        <field name="res_model">car.booking</field>
+        <field name="view_mode">graph</field>
+        <field name="context">{}</field>
+       <field name="domain">[('state','=','hoan_thanh')]</field>
+    </record>
+
+    <menuitem id="menu_car_booking_report_root"
+              name="Báo cáo đặt xe"
+              groups="car.group_admin"
+              parent="menu_car_root"
+              sequence="100"/>
+    <menuitem id="menu_car_booking_report"
+              name="Thống kê"
+              parent="menu_car_booking_report_root"
+              action="action_car_booking_graph"/>
+
+    <record id="action_car_booking_graph_by_month" model="ir.actions.act_window">
+        <field name="name">Thống kê theo tháng</field>
+        <field name="res_model">car.booking</field>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_car_booking_report_graph_by_month"/>
+        <field name="domain">[('state','=','hoan_thanh')]</field>
+    </record>
+
+    <menuitem id="menu_car_booking_graph_by_month"
+              name="Theo tháng"
+              parent="menu_car_booking_report_root"
+              action="action_car_booking_graph_by_month"/>
+
+    <record id="action_car_booking_graph_vehicle" model="ir.actions.act_window">
+        <field name="name">Xe được đặt nhiều</field>
+        <field name="res_model">car.booking</field>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_car_booking_graph_vehicle"/>
+        <field name="domain">[('state','=','hoan_thanh')]</field>
+    </record>
+
+    <menuitem id="menu_car_booking_graph_vehicle"
+              name="Theo xe"
+              parent="menu_car_booking_report_root"
+              action="action_car_booking_graph_vehicle"/>
+
+    <record id="action_car_booking_graph_customer" model="ir.actions.act_window">
+        <field name="name">Khách hàng thường xuyên</field>
+        <field name="res_model">car.booking</field>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_car_booking_graph_customer"/>
+        <field name="domain">[('state','=','hoan_thanh')]</field>
+    </record>
+
+    <menuitem id="menu_car_booking_graph_customer"
+              name="Theo khách hàng"
+              parent="menu_car_booking_report_root"
+              action="action_car_booking_graph_customer"/>
+</odoo>
