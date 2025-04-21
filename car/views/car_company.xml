@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_car_company_form" model="ir.ui.view">
+        <field name="name">view.car.company.form</field>
+        <field name="model">car.company</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="fax"/>
+                        <field name="address"/>
+                        <field name="primary_contact_person"/>
+                        <field name="is_active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_car_company_list" model="ir.ui.view">
+        <field name="name">view.car.company.list</field>
+        <field name="model">car.company</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="fleet_vehicle_ids"/>
+                <field name="fax"/>
+                <field name="address"/>
+                <field name="primary_contact_person"/>
+                <field name="is_active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_car_company_search" model="ir.ui.view">
+        <field name="name">view.car.company.search</field>
+        <field name="model">car.company</field>
+        <field name="arch" type="xml">
+            <search>
+                <filter string="Đang hoạt động" name="active_company"
+                        domain="[('is_active','=',True)]"/>
+                <filter string="Ngưng hoạt động" name="inactive_company"
+                        domain="[('is_active','=',False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_car_company" model="ir.actions.act_window">
+        <field name="name">Quản lý thông tin công ty xe</field>
+        <field name="res_model">car.company</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_car_company"
+              name="Quản lý thông tin công ty xe"
+              action="action_car_company"
+              parent="menu_car_company_root"
+              sequence="10"/>
+
+    <record id="action_fleet_vehicle_by_company" model="ir.actions.act_window">
+        <field name="name">Danh sách xe</field>
+        <field name="res_model">fleet.vehicle</field>
+        <field name="view_mode">list,form</field>
+        <!-- domain lọc tất cả xe đã gắn công ty -->
+        <field name="domain">[('car_company_id','!=',False)]</field>
+    </record>
+    <menuitem id="menu_fleet_vehicle_by_company"
+              name="Danh sách xe"
+              parent="menu_car_company_root"
+              action="action_fleet_vehicle_by_company"
+              sequence="20"/>
+
+    <!-- 2. Action & Menu: Đơn đặt xe theo Công ty -->
+    <record id="action_car_booking_by_company" model="ir.actions.act_window">
+        <field name="name">Đơn đặt xe</field>
+        <field name="res_model">car.booking</field>
+        <field name="view_mode">list,form</field>
+        <!-- domain lọc các booking đã gắn công ty -->
+        <field name="domain">[('company_id','!=',False)]</field>
+    </record>
+    <menuitem id="menu_car_booking_by_company"
+              name="Đơn đặt xe"
+              parent="menu_car_company_root"
+              action="action_car_booking_by_company"
+              sequence="30"/>
+
+    <!-- 3. Action & Menu: Báo cáo số lượt & doanh thu theo Công ty -->
+    <!-- Tree View báo cáo -->
+    <record id="view_car_booking_tree_report" model="ir.ui.view">
+        <field name="name">car.booking.tree.report</field>
+        <field name="model">car.booking</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="company_id"/>
+                <field name="vehicle_id"/>
+                <field name="customer_id"/>
+                <field name="driver_id"/>
+                <field name="pickup_date"/>
+                <field name="return_date"/>
+                <field name="amount"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Search View báo cáo -->
+    <record id="view_car_booking_search_report" model="ir.ui.view">
+        <field name="name">car.booking.search.report</field>
+        <field name="model">car.booking</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="company_id" string="Công ty"/>
+                <field name="vehicle_id" string="Xe"/>
+                <field name="customer_id" string="Khách hàng"/>
+                <field name="driver_id" string="Tài xế"/>
+                <field name="pickup_date" string="Ngày nhận xe"/>
+                <field name="return_date" string="Ngày trả xe"/>
+
+                <filter string="Hoàn thành" domain="[('state', '=', 'hoan_thanh')]" name="done_only"/>
+                <filter string="Đang thực hiện" domain="[('state', '=', 'dang_thuc_hien')]" name="in_progress"/>
+                <filter string="Đơn có doanh thu" name="with_amount" domain="[('amount', '&gt;', 0)]"/>
+                <filter string="Đơn không doanh thu" name="no_amount" domain="[('amount', '=', 0)]"/>
+
+                <group expand="0" string="Nhóm theo">
+                    <filter name="company" string="Công ty" context="{'group_by':'company_id'}"/>
+                    <filter name="customer" string="Khách hàng" context="{'group_by':'customer_id'}"/>
+
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action báo cáo -->
+    <record id="action_report_booking_company" model="ir.actions.act_window">
+        <field name="name">Báo cáo đặt xe theo công ty</field>
+        <field name="res_model">car.booking</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="domain">[('state', '=', 'hoan_thanh')]</field>
+        <field name="search_view_id" ref="view_car_booking_search_report"/>
+        <field name="context">
+            {
+            'group_by': ['company_id'],
+            'pivot_measures': ['amount'],
+            'graph_measures': ['amount'],
+            'search_default_group_by_company_id': 1
+            }
+        </field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_report_booking_company"
+              name="Báo cáo theo công ty"
+              parent="menu_car_company_root"
+              action="action_report_booking_company"
+              sequence="40"/>
+
+</odoo>
